@@ -1,0 +1,29 @@
+SELECT
+FROM
+SELECT COUNT
+SELECT DISTINCT
+COUNT (*) or COUNT (columnname) or COUNT (DISTINCT columnname)
+WHERE
+Use single quotation marks
+= equals, <> not equals, other commands like R
+AND
+OR
+When combining AND and OR, be sure to enclose the individual clauses in parentheses
+WHERE (release_year = 1994 OR release_year = 1995)
+AND (certification = 'PG' OR certification = 'R')
+BETWEEN (BETWEEN is inclusive, meaning the beginning and end values are included in the results!)
+IN (following WHERE). Use parentheses 
+IS NULL and IS NOT NULL 
+LIKE and NOT LIKE
+The % wildcard will match zero, one, or many characters in text. For example, the following query matches companies like 'Data', 'DataC' 'DataCamp', 'DataMind': WHERE name LIKE 'Data%'
+WHERE name LIKE 'Data%'
+AVG(x) gives average, MAX(x), SUM(x), MIN(x)
+In addition to using aggregate functions, you can perform basic arithmetic with symbols like +, -, *, and /
+SQL assumes that if you divide an integer by an integer, you want to get an integer back. So be careful when dividing! So when you're dividing make sure at least one of your numbers has a decimal place.
+SQL allows you to do something called aliasing. Aliasing simply means you assign a temporary name to something. To alias, you use the AS keyword. 
+ORDER BY keyword is used to sort results in ascending or descending order according to the values of one or more columns. (DESC or ASC). DESC gives you reverse order. ORDER BY can also be used to sort on multiple columns. It will sort by the first column specified, then sort by the next, then the next, and so on
+GROUP BY is used with aggregate functions like COUNT() or MAX(). Note that GROUP BY always goes after the FROM clause! Note also that ORDER BY always goes after GROUP BY
+Aggregate functions can't be used in WHERE clauses.
+HAVING
+LIMIT
+JOIN working with multiple table
