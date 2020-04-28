@@ -1,0 +1,118 @@
+Introduction
+
+Cluster analysis is a form of data exploration 
+EDA where observations are divided into meaningful groups that share common features (columns)
+Steps (you may need to iterate):
+Pre-processing
+Decide on metric for clustering
+Cluster
+Analyze output 
+
+Concept of distance 
+
+Mathematical calculation for a measure of similarity. Distance = 1 - Similarity 
+dist() with argument for different methods (default Euclidean)
+Euclidean distance is good for continuous data.
+Jaccard index is good for categorical data. For non-binary (true-false) values, use dummification to create them. dummy.data.frame() function and method “binary” in dist() function 
+If dealing with different metrics, we need to convert our features to be on a similar scale to one another. Different methods:
+Standardization: Use the SD and mean: x - mean(x) / sd(x)
+Use the scale() function 
+
+Hierarchical clustering 
+
+Any distance
+Results are stable 
+Iterative binary grouping using linkage criteria
+Complete linkage criteria - maximum distance between two sets
+Single linkage -  minimum distance between two sets
+Average linkage -  average distance between two sets
+hclust() function takes dist and method as arguments. Method ‘complete’ is default. Creates hierarchical clusters. 
+To divide klusters we use the cutree() function and specify k = 2 (or the number of clusters we want).
+
+K-means clustering 
+
+Just euclidean distance
+Results are NOT stable (change upon iterations) 
+Kmeans algorithm has less benefits than hierarchical clustering but is less expensive in terms of computational power
+Function kmeans() with centers = k argument 
+
+Calculating k for a dataset and evaluating clusters 
+
+Dendrogram (tree) - just for hierarchical. Use plot() function and cut off based on height, see code below. We can color our dendrograph.
+Elbow method - both clustering methods. Plot and look for the point when the curve begins to flatten (elbow). See code below.
+Silhouette method - both clustering methods. Value of 1 means well matched, 0 on the border between two clusters, -1 better fit in the neighbouring cluster. Average silhouette width can help evaluate the whole model. Use the pam() function from the cluster library then silhouette(), then plot. See code. 
+
+Pre-processing data
+
+Are there NA values?
+Are the variables within the data comparable to one another or should they be scaled?
+Do categorical variables exist within this data and therefore need to be dummified?
+
+Exploring more than two dimensions
+
+Multiple plots - limitations with many factors 
+Dimensionality reduction methods - principle component analysis   - difficult to interpret
+Explore distribution characteristics - mean, median etc 
+
+Next steps: DBSCAN and Optics
+
+Code - Dendrogram
+
+# Calculate Euclidean distance between the occupations
+dist_oes <- dist(oes, method = "euclidean")
+
+# Generate an average linkage analysis 
+hc_oes <- hclust(dist_oes, method = "average")
+
+# Create a dendrogram object from the hclust variable
+dend_oes <- as.dendrogram(hc_oes)
+
+# Plot the dendrogram
+plot(dend_oes)
+
+# Color branches by cluster formed from the cut at a height of 100000
+dend_colored <- color_branches(dend_oes, h = 100000)
+
+# Plot the colored dendrogram
+plot(dend_colored)
+
+
+Code - Elbow Method
+
+library(purrr)
+
+# Use map_dbl to run many models with varying value of k (centers)
+tot_withinss <- map_dbl(1:10,  function(k){
+  model <- kmeans(x = lineup, centers = k)
+  model$tot.withinss
+})
+
+# Generate a data frame containing both k and tot_withinss
+elbow_df <- data.frame(
+  k = 1:10,
+  tot_withinss = tot_withinss
+)
+# Plot the elbow plot
+ggplot(elbow_df, aes(x = k, y = tot_withinss)) +
+  geom_line() +
+  scale_x_continuous(breaks = 1:10)
+
+Code - Silhouette Method
+
+# Use map_dbl to run many models with varying value of k
+sil_width <- map_dbl(2:10,  function(k){
+  model <- pam(oes, k = k)
+  model$silinfo$avg.width
+})
+
+# Generate a data frame containing both k and sil_width
+sil_df <- data.frame(
+  k = 2:10,
+  sil_width = sil_width
+)
+
+# Plot the relationship between k and sil_width
+ggplot(sil_df, aes(x = k, y = sil_width)) +
+  geom_line() +
+  scale_x_continuous(breaks = 2:10)
+
