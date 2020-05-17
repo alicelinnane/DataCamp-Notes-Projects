@@ -1,0 +1,159 @@
+Topics Covered  
+K-means and hierarchical cluster analysis
+Dimensionality reduction (PCA)
+
+Further learning: 
+See Cluster Analysis notes 
+Read further on PCA for a more concrete understanding. A bit abstract in the tutorial. 
+Proportion of variance 
+Cumulative proportion 
+Scaled features have a mean of 0 and a SD of 1 (research this point more)
+
+UNSUPERVISED LEARNING
+
+For more information, see Cluster Analysis notes. 
+
+Overview:
+Machine learning mainly serves for classification, prediction, automation. The machine learns on its own as opposed to being instructed what to do. 
+Three types of machine learning: 
+Unsupervised (finding structure in unlabelled data)
+Supervised (makes predictions on labelled data) 
+Reinforcement learning (computer learns from feedback) 
+
+Example of step-by-step unsupervised machine learning: 
+
+Download and prepare data for modelling 
+EDA (# observations, # features etc.) 
+Perform PCA and analyze results 
+Two types of clustering
+Understand and compare two types
+Combine PCA and clustering 
+
+See code below. 
+
+K-means and hierarchical cluster analysis
+
+Package(s): 
+Functions:
+kmeans() function uses the nstart = 1 argument which indicates the number of times kmeans will be repeated. Use the set.seed() function to guarantee reproducibility 
+abline() function in R with the h argument to specific the height and the color function cuts the dendrogram at the desired height. Alternative to cutree() function 
+colMeans() function calls the means of all columns
+apply(x, 2, sd) - to get the sd of all columns
+scale () function also works
+
+Overview:
+Kmeans: Look for the lowest sum within squares error
+Euclidean distance: Complete, single, average OR centroid method - distance focuses on distance between the centroid rather than distance between the pairs
+Complete and average tend to produce more balanced trees and are the most commonly used. Single produces unbalanced trees - desirable for detecting outliers. Centroid linkage produces inversions which is undesirable behaviour. 
+Normalization is the process for scaling features using SD and mean
+Good practice to normalize everything even if on the same scale - if the SDs and means vary, you should scale the data 
+Scaled features have a mean of 0 and a SD of 1 (research this point more)
+
+Code - Run kmeans iterations to see which total within cluster sum of squares error is lowest (loops) 
+
+# Set up 2 x 3 plotting grid
+par(mfrow = c(2, 3))
+
+# Set seed
+set.seed(1)
+
+for(i in 1:6) {
+  # Run kmeans() on x with three clusters and one start
+  km.out <- kmeans(x, centers = 3, nstart = 1)
+  
+  # Plot clusters
+  plot(x, col = km.out$cluster, 
+       main = km.out$tot.withinss, 
+       xlab = "", ylab = "")
+}
+
+Code - Run kmeans iterations to see which total within cluster sum of squares error is lowest testing different cluster sizes (loops) 
+
+# Initialize total within sum of squares error: wss
+wss <- 0
+
+# Look over 1 to 15 possible clusters
+for (i in 1:15) {
+  # Fit the model: km.out
+  km.out <- kmeans(pokemon, centers = i, nstart = 20, iter.max = 50)
+  # Save the within cluster sum of squares
+  wss[i] <- km.out$tot.withinss
+}
+
+# Produce a scree plot
+plot(1:15, wss, type = "b", 
+     xlab = "Number of Clusters", 
+     ylab = "Within groups sum of squares")
+
+# Select number of clusters
+k <- 2
+
+# Build model with k clusters: km.out
+km.out <- kmeans(pokemon, centers = 2, nstart = 20, iter.max = 50)
+
+# View the resulting model
+km.out
+
+# Plot of Defense vs. Speed by cluster membership
+plot(pokemon[, c("Defense", "Speed")],
+     col = km.out$cluster,
+     main = paste("k-means clustering of Pokemon with", k, "clusters"),
+     xlab = "Defense", ylab = "Speed")
+
+Dimensionality reduction
+
+Package(s): 
+Functions:
+prcomp() function creates PCA. Arguments = data, scale (the column standard deviations used to scale the data,), center, the column means used to center the data (recommends leaving this as TRUE). 
+biplot() function
+
+Overview:
+Dimensionality reduction visually finds patterns in the features of the dats, represents high dimensional data (more than 3-4 features) and is also a preprocessing step for supervised learning Two main goals: 
+To find structure in features and to aid in visualization 
+A popular method of dimensionality reduction is principal components analysis (PCA). Goals are to: 
+Linear combination of the original features to find principal components
+Maintain as much variance in data as possible
+Principle components are uncorrelated (orthogonal to one other)
+Example of PCA - Takes a two dimensional graph (observation points plotted on an x-y graph) and reduces it to one dimension. I.e. two features to one feature
+Step 1: fit a regression line through the data (first principle component of the data)
+Step 2: calculate component scores or factor scores 
+Data with 3-4 features can be difficult to visualize
+Rotation: the directions of the principal component vectors in terms of the original features/variables. This information allows you to define new data in terms of the original principal components
+Visualizations to understand PCA models:
+Biplot - first two principal components. Biplot() function. 
+Scree plot - proportion of variance explained by each principal component or the cumulative proportion of variance explained as the number of principal components increases. To build the plot you need the square SD of each principal component. 
+Challenges: 
+Sometimes scaling is appropriate when the variances of the variables are substantially different. This is commonly the case when variables have different units of measurement, for example, degrees Fahrenheit (temperature) and miles (distance). Important part of PCA.
+Missing values. Solution is imputation or eliminating missing values. 
+Categorical observations: encode categorical features as numbers. 
+Two common reasons for scaling data:
+The input variables use different units of measurement.
+The input variables have significantly different variances.
+Scaling the data. Same issue with clustering, may want to scale data by subtracting the means of each feature and divided by SD. prcomp() has a scale argument that you can set to true.
+summary() function is important to finding information about each principal component 
+
+Code -Creating two scree plots (proportion of variance explained and cumulative proportion of variance explained) for PCA model (pr.out)
+
+# Variability of each principal component: pr.var
+pr.var <- pr.out$sdev^2
+
+# Variance explained by each principal component: pve
+pve <- pr.var / sum(pr.var)
+
+# Plot variance explained for each principal component
+plot(pve, xlab = "Principal Component",
+     ylab = "Proportion of Variance Explained",
+     ylim = c(0, 1), type = "b")
+
+# Plot cumulative proportion of variance explained
+plot(cumsum(pve), xlab = "Principal Component",
+     ylab = "Cumulative Proportion of Variance Explained",
+     ylim = c(0, 1), type = "b")
+
+
+
+
+
+
+
+
