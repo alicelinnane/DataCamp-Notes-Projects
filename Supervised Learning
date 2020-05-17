@@ -1,0 +1,234 @@
+Topics Covered  
+Nearest neighbours principle
+Naive Bayes
+Logistic Regression
+Classification trees and random forests
+
+Areas of Further Learning 
+Confusion matrix
+ifelse() function 
+
+SUPERVISED LEARNING
+
+Nearest Neighbours Principle
+
+Package(s): class
+Functions:
+knn() function as part of the class packet. Arguments aretraining_data, testing_data, labels prob = TRUE computes to compute vote proportions (nearest neighbours), k = 1 indicates number of neighbours, 
+attr() function
+
+Overview:
+Uses distance, typically Euclidean distance, the straight line distance between points
+Properties of the signs are coordinates in a "feature space". Example colour. 
+K specifies the number of neighbours. Higher value means more neighbours are tested. Smaller K allows the discovery of subtle patterns. Larger K ignores noisy points to develop a broader pattern. Optimal value depends on complexity of pattern to be learned as well as the impact of noisy data. One rule of thumb is k = square root of number of observations in the training data. Or test various values of k and compare results. 
+Dist functions often assume your data is in numerical format. Need to dummify data. 
+Need to normalize the values so they have the same range. 
+
+Code: 
+
+# Compute the accuracy of the baseline model (default k = 1)
+k_1 <- knn(train = signs[-1], test = signs_test[-1], cl = sign_types, k = 1)
+mean(k_1 == signs_actual)
+
+# Modify the above to set k = 7
+k_7 <- knn(train = signs[-1], test = signs_test[-1], cl = sign_types, k = 7)
+mean(k_7 == signs_actual)
+
+# Set k = 15 and compare to the above
+k_15 <- knn(train = signs[-1], test = signs_test[-1], cl = sign_types, k = 15)
+mean(k_15 == signs_actual)
+
+# Use the prob parameter to get the proportion of votes for the winning class
+sign_pred <- knn(train = signs[-1], test = signs_test[-1], cl = sign_types, prob = TRUE, k = 7)
+
+# Get the "prob" attribute from the predicted classes
+sign_prob <- attr(sign_pred, "prob")
+# Examine the first several predictions
+head(sign_pred)
+
+# Examine the proportion of votes for the winning class
+head(sign_prob)
+
+Naive Bayes
+
+Package(s): naivebayes 
+Functions:
+naive_bayes() function builds the model. Set the laplace = 1 argument to avoid a possible 0 probability. 
+predict() function predicts the future data, type = "prob" argument means R will compute the posterior (predicted) probabilities. You can also type the name of the model object to get a priori (overall) and conditional probabilities for each of the model's predictors. 
+Overview:
+Thomas Bayes was famous for predicting data using statistics and historical trends
+Key terms: 
+Joint probability measures the likelihood that two (or more) events will both occur
+Independent events are unrelated
+Dependent events are related to one another
+Conditional probability measures how likely one thing is to happen if you know that another thing has happened. The probability of event A given B is equal to their joint probability divided by the probability of B. 
+Naive Bayes model: When the model has more data points or predictors, it is more complicated. Single prediction is based on the overlap of two events (Venn diagram). Naive bayes uses a shortcut to approximate the conditional probability. Rather than the intersection of all events, the model makes a “naive” assumption about the data, assuming they are independent events and joint probability is computed by multiplying individual probabilities. No downside except the number 0 if one probability is 0. Solution is to add 1 to each event and outcome combination - the Laplace correction. 
+Naive Bayes can be used for lots of problems, evaluating attributes simultaneously like a doctor. Also used for classifying text data. 
+Challenges include:
+Numerical properties like age and unstructured text data are difficult for NB.
+Solution include (for numerical data) and “bag of words” (for unstructured text)
+
+Regression Analysis
+
+Package(s): pROC
+Functions:
+glm() function creates a logistic regression model. Family argument details the type of regression model. Family = “binomial” for logistic regression.
+predict(). Type = “response” argument gives predictive probabilities (easier to interpret than default log-odds values)
+ifelse() function 
+
+Overview:
+Single most common form of machine learning, predicts y (dependent) based on x variables (interdependent) 
+Linear regression refers to fitting a straight line
+Logistic regression: S-shaped curve
+To make predictions the probability must be converted to the outcome of interest using ifelse() function. If if/else predicts “1” then the predicted probability is greater than 50% (or a specified percentage) and 0 is lesser
+Accuracy is a misleading measure of model performance on imbalanced datasets.Graphing the model's performance better illustrates the tradeoff between a model that is overly aggressive and one that is overly passive.  
+An ROC curve provides a way to better understand a model’s ability to distinguish between positive and negative predictions of the outcome of interest versus all others.
+Distance from straight diagonal line is indicative of model performance.To quantity, measure AUC (area under the curve). Interpret: 0.5 is a poor model, 1 is the best. It’s important not to look just at AUC but also the shape of the curve.
+Interaction effect (denote with *) indicates how when variables can have a different impact combined then they do when you sum their impact, eg. smoking and obesity. 
+Challenges include:
+Missing data or NAs
+Solution: Missing data can be its own value for categorical data
+Solution: For numerical data, use imputation. Mean imputation is common with a column indicating which values were imputed (TRUE/FALSE or 1/0). Not also appropriate for complex models. Predictions can be used to impute data.
+gml() function automatically dummies all data that is a factor
+Stepwise regression helps figure out which features to include in a model by building it step-by-step. 
+Backward deletion starts with all features, eliminating each one to see impact on the model, until only the important predictions remain. 
+Forward selection starts with no predictions and tries each feature. 
+Code:
+
+Build a logistic regression model: 
+
+# Build a recency, frequency, and money (RFM) model
+rfm_model <- glm(donated ~ money + recency * frequency, donors, family = "binomial")
+
+# Summarize the RFM model to see how the parameters were coded
+summary(rfm_model)
+
+# Compute predicted probabilities for the RFM model
+rfm_prob <- predict(rfm_model, type = "response")
+
+# Plot the ROC curve and find AUC for the new model
+library(pROC)
+ROC <- roc(donors$donated, rfm_prob)
+plot(ROC, col = "red")
+auc(ROC)
+
+ROC model: 
+
+# Load the pROC package
+library(pROC)
+
+# Create a ROC curve
+ROC <- roc(donors$donated, donors$donation_prob
+
+# Plot the ROC curve
+plot(ROC, col = "blue")
+
+# Calculate the area under the curve (AUC)
+auc(ROC)
+
+Impute NA values
+
+# Find the average age among non-missing values
+summary(donors$age)
+
+# Impute missing age values with the mean age
+donors$imputed_age <- ifelse(is.na(donors$age), round(mean(donors$age, na.rm = TRUE), 2), donors$age)
+
+# Create missing value indicator for age
+donors$missing_age <- ifelse(is.na(donors$age), 1, 0)
+
+Stepwise regression
+
+# Specify a null model with no predictors
+null_model <- glm(donated ~ 1, data = donors, family = "binomial")
+
+# Specify the full model using all of the potential predictors
+full_model <- glm(donated ~ ., data = donors, family = "binomial")
+
+# Use a forward stepwise algorithm to build a parsimonious model
+step_model <- step(null_model, scope = list(lower = null_model, upper = full_model), direction = "forward")
+
+# Estimate the stepwise donation probability
+step_prob <- predict(step_model, type = "response")
+
+# Plot the ROC of the stepwise model
+library(pROC)
+ROC <- roc(donors$donated, step_prob)
+plot(ROC, col = "red")
+auc(ROC)
+
+Classification Trees
+
+Package(s): rpart.control, randomForest
+Functions:
+rpart() function, method = “class” argument can specific classification tree 
+predict() function obtains predicted class values, type = “class”
+rpart.control()
+randomForest() function with arguments ntree (number of trees) and mtry (the number of features selected at random for each tree). 
+plotcp() function visualizes graphs to make decisions on pruning. 
+ 
+Overview:
+Useful for business strategy
+Captures the model relationship between predictors and an outcome of interest
+Root node → if/else decision nodes → branches are choices → leaf nodes/terminal nodes (final decision)
+Growing conditions of decision trees: 
+Divide-and-conquer process until all groups are homogenous
+Creates so-called axis-parallel splits - single features
+Weakness: Decision trees can be overly complex and be prone to overfitting (rather than modelling the important trends, they models the noise). 
+Solution: Important to simulate future data to check this → hold a small dataset sample (test set) with 25% of data. If the training set performs  better than the test set, it suggests that the model has been overfitted. 
+Pruning strategies:
+Pre-pruning - stops divide-and-conquer once the tree meets a defined size
+Pre-pruning - Minimal number of observations at a node in order for a split to occur. rpart.control() function with maxdepth and minsplit arguments
+Post-pruning - nodes and branches with only a minor impact of the tree’s accuracy are pruned after the fact. prune() with argument cp to indicate what point it should be pruned.
+Complexity and accuracy can be depicted - optimal point at which to prune the tree - point at which the curve flattens. plotcp() function visualizes this graph.
+A number of classification trees can be grouped into decision tree forests (very powerful). Each tree represents different data (data should be subsetted randomly). Hence the term random forests. In a random forest, each tree makes a prediction and these are combined to make a strong single prediction 
+Machine learning methods like random forests that apply the principle of teamwork → Ensemble methods
+
+Classification tree code
+
+# Load the rpart package
+library(rpart)
+
+# Build a lending model predicting loan outcome versus loan amount and credit score
+loan_model <- rpart(outcome ~ loan_amount + credit_score, data = loans, method = "class", control = rpart.control(cp = 0))
+
+# Make a prediction for someone with good credit
+predict(loan_model, good_credit, type = "class")
+
+# Make a prediction for someone with bad credit
+predict(loan_model, bad_credit, type = "class")
+
+Creating random data test sets to validate accuracy of classification tree (test sets should comprise 25% of the data)
+
+# Determine the number of rows for training
+nrow(loans)
+
+# Create a random sample of row IDs
+sample_rows <- sample(11312, 8484)
+
+# Create the training dataset
+loans_train <- loans[sample_rows, ]
+
+# Create the test dataset
+loans_test <- loans[-sample_rows, ]
+
+# Grow a tree using all of the available applicant data
+loan_model <- rpart(outcome ~ ., data = loans_train, method = "class", control = rpart.control(cp = 0))
+#setting cp to 0 prevents pre-pruning
+
+# Make predictions on the test dataset
+loans_test$pred <- predict(loan_model, loans_test, type = "class")
+
+# Examine the confusion matrix
+table(loans_test$pred, loans_test$outcome)
+
+# Compute the accuracy on the test dataset
+mean(loans_test$pred == loans_test$outcome)
+
+
+
+
+
+
+
+
